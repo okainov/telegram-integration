@@ -316,7 +316,7 @@ func (s *Service) searchHandler(ctx context.Context, b *bot.Bot, m *models.Updat
 	ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", fmt.Sprintf("Bearer %s", accessToken.(string))))
 	results, err := s.client.MemoService.ListMemos(ctx, &v1pb.ListMemosRequest{
 		PageSize: 50,
-		Filter:   "",
+		Filter:   filterString,
 	})
 
 	if err != nil {
