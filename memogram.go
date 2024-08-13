@@ -259,6 +259,7 @@ func (s *Service) handler(ctx context.Context, b *bot.Bot, m *models.Update) {
 	formattedTime = strings.ReplaceAll(formattedTime, "-", "\\-")
 
 	tgMessage := fmt.Sprintf("Content saved with [%s](%s/m/%s) \\(%s\\)", memo.Name, s.getMemosUrl(), memo.Uid, formattedTime)
+	slog.Info("Going to send message", slog.Any("tgMessage", tgMessage))
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:              m.Message.Chat.ID,
