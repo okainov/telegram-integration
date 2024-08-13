@@ -119,6 +119,9 @@ func (s *Service) handler(ctx context.Context, b *bot.Bot, m *models.Update) {
 	if strings.HasPrefix(m.Message.Text, "/start ") {
 		s.startHandler(ctx, b, m)
 		return
+	} else if strings.HasPrefix(m.Message.Text, "/ping ") {
+		s.pingHandler(ctx, b, m)
+		return
 	}
 
 	userID := m.Message.From.ID
@@ -271,6 +274,15 @@ func (s *Service) startHandler(ctx context.Context, b *bot.Bot, m *models.Update
 		ChatID: m.Message.Chat.ID,
 		Text:   fmt.Sprintf("Hello %s!", user.Nickname),
 	})
+}
+
+func (s *Service) pingHandler(ctx context.Context, b *bot.Bot, m *models.Update) {
+	accessToken := strings.TrimPrefix(m.Message.Text, "/ping ")
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: m.Message.Chat.ID,
+		Text:   accessToken,
+	})
+	return
 }
 
 func (s *Service) saveResourceFromFile(ctx context.Context, file *models.File, memo *v1pb.Memo) (*v1pb.Resource, error) {
