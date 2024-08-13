@@ -318,14 +318,25 @@ func (s *Service) searchHandler(ctx context.Context, b *bot.Bot, m *models.Updat
 		return
 	}
 
-	for _, memo := range results.GetMemos() {
-		slog.Info("Fetched memo", slog.Any("memo", memo.Name))
+	memos := results.GetMemos()
 
-		tgMessage := memo.Name + "\n" + memo.Content
+	if len(memos) == 0 {
+		slog.Info("No memos found by ", slog.Any("searchString", searchString))
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: m.Message.Chat.ID,
-			Text:   tgMessage,
+			Text:   "No memos found for the specified search criteria.",
 		})
+	} else {
+		slog.Info("Fetched memos: ", slog.Any("len", len(memos)))
+		for _, memo := range results.GetMemos() {
+			slog.Info("Fetched memo", slog.Any("memo", memo.Name))
+
+			tgMessage := memo.Name + "\n" + memo.Content
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: m.Message.Chat.ID,
+				Text:   tgMessage,
+			})
+		}
 	}
 
 	return
