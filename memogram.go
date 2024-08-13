@@ -138,6 +138,9 @@ func (s *Service) handler(ctx context.Context, b *bot.Bot, m *models.Update) {
 	} else if strings.HasPrefix(m.Message.Text, "/ping ") {
 		s.pingHandler(ctx, b, m)
 		return
+	} else if strings.HasPrefix(m.Message.Text, "/search ") {
+		s.searchHandler(ctx, b, m)
+		return
 	}
 
 	userID := m.Message.From.ID
@@ -299,6 +302,32 @@ func (s *Service) pingHandler(ctx context.Context, b *bot.Bot, m *models.Update)
 		ChatID: m.Message.Chat.ID,
 		Text:   accessToken,
 	})
+	return
+}
+
+func (s *Service) searchHandler(ctx context.Context, b *bot.Bot, m *models.Update) {
+	searchString := strings.TrimPrefix(m.Message.Text, "/search ")
+
+	results, err := s.client.MemoService.ListMemos(ctx, &v1pb.ListMemosRequest{
+		PageSize: 50,
+		Filter:   "content_search == [\"" + searchString + "\"]",
+	})
+
+	if err != nil {
+		slog.Error("failed to search memos", slog.Any("err", err))
+		return
+	}
+
+	for _, memo := range results.GetMemos() {
+		slog.Info("Fetched memo", slog.Any("memo", memo.Name))
+
+		tgMessage := memo.Name + "\n" + memo.Content
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: m.Message.Chat.ID,
+			Text:   tgMessage,
+		})
+	}
+
 	return
 }
 
