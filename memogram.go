@@ -308,9 +308,11 @@ func (s *Service) pingHandler(ctx context.Context, b *bot.Bot, m *models.Update)
 func (s *Service) searchHandler(ctx context.Context, b *bot.Bot, m *models.Update) {
 	searchString := strings.TrimPrefix(m.Message.Text, "/search ")
 
+	filterString := "content_search == ['" + searchString + "'] && visibilities == ['PUBLIC', 'PROTECTED', 'PRIVATE']"
+	slog.Info("Will search with", slog.Any("filterString", filterString))
 	results, err := s.client.MemoService.ListMemos(ctx, &v1pb.ListMemosRequest{
 		PageSize: 50,
-		Filter:   "content_search == [\"" + searchString + "\"]",
+		Filter:   filterString,
 	})
 
 	if err != nil {
