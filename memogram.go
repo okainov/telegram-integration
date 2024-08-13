@@ -306,10 +306,14 @@ func (s *Service) pingHandler(ctx context.Context, b *bot.Bot, m *models.Update)
 }
 
 func (s *Service) searchHandler(ctx context.Context, b *bot.Bot, m *models.Update) {
+	userID := m.Message.From.ID
 	searchString := strings.TrimPrefix(m.Message.Text, "/search ")
 
-	filterString := "content_search == ['" + searchString + "'] && visibilities == ['PUBLIC', 'PROTECTED', 'PRIVATE']"
+	filterString := "content_search == ['" + searchString + "']"
 	slog.Info("Will search with", slog.Any("filterString", filterString))
+	
+	accessToken, _ := userAccessTokenCache.Load(userID)
+	ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("Authorization", fmt.Sprintf("Bearer %s", accessToken.(string))))
 	results, err := s.client.MemoService.ListMemos(ctx, &v1pb.ListMemosRequest{
 		PageSize: 50,
 		Filter:   "",
