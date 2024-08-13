@@ -105,6 +105,16 @@ func extractDateAndCreateTimestamp(s string) (*timestamppb.Timestamp, error) {
 	return timestamp, nil
 }
 
+func (s *Service) getMemosUrl() string {
+	url := s.config.ServerAddr
+	url = strings.TrimPrefix(url, "dns:")
+	// Compile regex to match ":<any numbers>"
+	re := regexp.MustCompile(`:\d+`)
+
+	// Transform to proper URL
+	return "https://" + re.ReplaceAllString(url, "")
+}
+
 func (s *Service) handler(ctx context.Context, b *bot.Bot, m *models.Update) {
 	if strings.HasPrefix(m.Message.Text, "/start ") {
 		s.startHandler(ctx, b, m)
@@ -228,7 +238,8 @@ func (s *Service) handler(ctx context.Context, b *bot.Bot, m *models.Update) {
 	formattedTime := memo.CreateTime.AsTime().Format("2006-01-02 15:04:05")
 	// Escape minuses for Telegram
 	formattedTime = strings.ReplaceAll(formattedTime, "-", "\\-")
-	tgMessage := fmt.Sprintf("Content saved with [%s](%s/m/%s) \\(%s\\)", memo.Name, s.config.ServerAddr, memo.Uid, formattedTime)
+
+	tgMessage := fmt.Sprintf("Content saved with [%s](%s/m/%s) \\(%s\\)", memo.Name, s.getMemosUrl(), memo.Uid, formattedTime)
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:              m.Message.Chat.ID,
