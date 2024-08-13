@@ -312,7 +312,7 @@ func (s *Service) searchHandler(ctx context.Context, b *bot.Bot, m *models.Updat
 	slog.Info("Will search with", slog.Any("filterString", filterString))
 	results, err := s.client.MemoService.ListMemos(ctx, &v1pb.ListMemosRequest{
 		PageSize: 50,
-		Filter:   filterString,
+		Filter:   "",
 	})
 
 	if err != nil {
